@@ -1,15 +1,27 @@
-let TIME = 5000;
+let TIME = localStorage.getItem('time') ? parseInt(localStorage.getItem('time')) : 5000;
 const RESULT_TIME = 3000;
+const CACHE_ASSETS = ['index.html', 'logic.js'];
 let CUR_INTERVAL = null;
 let CUR_TIMER = null;
 
+function getTimeVal() {
+    console.log('time is', TIME, 'ms');
+    return TIME;
+};
+
+function setTimeVal(v) {
+    v = parseInt(v);
+    console.log('time set to', v, 'ms');
+    TIME = v;
+    localStorage.setItem("time", TIME);
+};
+
 function setTime() {
     let sec = parseInt(document.getElementById('sec').value) * 1000;
-    console.log(sec);
     if (sec <= RESULT_TIME || CUR_INTERVAL == null) {
-        sec = TIME;
+        sec = getTimeVal();
     }
-    TIME = sec;
+    setTimeVal(sec);
     document.getElementById('sec').value = sec / 1000;
     if (CUR_INTERVAL) {
         prepare();
@@ -34,7 +46,7 @@ function setNumbers() {
     CUR_TIMER = setTimeout((n1, n2) => {
         const res = document.getElementById('res');
         res.innerText = n1 - n2;
-    }, TIME, n1, n2);
+    }, getTimeVal(), n1, n2);
 };
 
 function prepare() {
@@ -44,9 +56,15 @@ function prepare() {
     }
     CUR_INTERVAL = setInterval(() => {
         setNumbers();
-    }, TIME + RESULT_TIME);
+    }, getTimeVal() + RESULT_TIME);
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("worker.js");
+    }
+
+    document.getElementById('sec').value = getTimeVal() / 1000;
     prepare();
 });
